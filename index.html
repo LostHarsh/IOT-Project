@@ -1,0 +1,222 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html {
+            font-family: Arial;
+            display: inline-block;
+            text-align: center;
+        }
+        h2 {
+            font-size: 3.0rem;
+        }
+        p {
+            font-size: 3.0rem;
+        }
+        html, body {
+            margin: 0;
+        }
+       
+        #pre-loader {
+            background: #C4EBE8 url(sources/infinite-gif-preloader.gif) no-repeat center;
+            height: 100vh;
+            width: 100%;
+            position: fixed;
+            z-index: 100;
+            background-size: 25%;
+        }
+        .status-container {
+            height: 200px;
+            background-color: aqua;
+            background-color: aqua;
+        }
+        .r1-status-container,.r2-status-container {
+            height: 200px;
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-content: center;
+            justify-content: center;
+            background-color: rgb(0, 255, 55);
+            min-width: 250px;
+            border: black 2px solid;
+        }
+        .update-status {
+            height: 41px;
+            width: 166px;
+        }
+    </style>
+</head>
+<body>
+    <div class="pre-loader" id="pre-loader"></div>
+    <br>
+
+    <h3>I Mech Industries</h3>
+
+    <table>
+        <tr>
+            <th>Array ID</th>
+            <th>Start Time</th>
+            <th>Send Button</th>
+            <th>Relay 1</th>
+            <th>Relay 2</th>
+        </tr>
+        <tr>
+            <td>Node Mcu 1 (192.168.xx.xx)</td>
+            <td>
+
+                <label>Hour:</label>
+                <input type="number" min="0" max="23" class="hour index-0">
+                <br>
+                <label>Minute:</label>
+                <input type="number" min="0" max="59" class="minute index-0">
+                <br>
+            </td>
+            <td>
+                <button onclick="sendTime('index-0')">Send Time</button>
+            </td>
+            <td>
+                <svg width="15" height="15" id="R1GreenSvg-0">
+                    <image href="sources\Green.svg" width="15" height="15" style="display: block;" class="index-0" />
+                </svg>
+                <svg width="15" height="15" id="R1RedSvg-0">
+                    <image href="sources\Red.svg" width="15" height="15" style="display: block;" class="index-0" />
+                </svg>
+            </td>
+            <td>
+                <svg width="15" height="15" id="R2GreenSvg-0">
+                    <image href="sources\Green.svg" width="15" height="15" style="display: block;" class="index-0" />
+                </svg>
+                <svg width="15" height="15" id="R2RedSvg-0">
+                    <image href="sources\Red.svg" width="15" height="15" style="display: block;" class="index-0" />
+                </svg>
+            </td>            
+        </tr>
+
+        <tr>
+            <td>Node Mcu 2 (192.168.xx.xy)</td>
+            <td>
+
+                <label>Hour:</label>
+                <input type="number" min="0" max="23" class="hour index-1">
+                <br>
+                <label>Minute:</label>
+                <input type="number" min="0" max="59" class="minute index-1">
+                <br>
+            </td>
+            <td>
+                <button onclick="sendTime('index-1')">Send Time</button>
+            </td>
+            <td>
+                <svg width="15" height="15" id="R1GreenSvg-1">
+                    <image href="sources\Green.svg" width="15" height="15" style="display: block;" class="index-1" />
+                </svg>
+                <svg width="15" height="15" id="R1RedSvg-1">
+                    <image href="sources\Red.svg" width="15" height="15" style="display: block;" class="index-1" />
+                </svg>
+            </td>
+            <td>
+                <svg width="15" height="15" id="R2GreenSvg-1">
+                    <image href="sources\Green.svg" width="15" height="15" style="display: block;" class="index-1" />
+                </svg>
+                <svg width="15" height="15" id="R2RedSvg-1">
+                    <image href="sources\Red.svg" width="15" height="15" style="display: block;" class="index-1" />
+                </svg>
+            </td>            
+        </tr>
+    </table>
+    <button onclick="updateStatus('index-0')">Update Status</button>
+    <button onclick="updateStatus('index-1')">Update Status</button>
+
+    <script>
+        var IPArray = ["192.168.xx.xx", "192.168.xx.xy"];
+
+        async function updateStatus(indexClass) {
+
+            var index = parseInt(indexClass.split('-')[1]);
+            // Simulating server response (replace with actual server request and handling logic)
+            const response = await fetch("http://" + IPArray[index] + "/updateStatus");
+            const responseData = await response.json(); // Parse JSON response
+
+            // Get references to the SVG elements
+            const R1GreenSvg = document.getElementById("R1GreenSvg-" + index);
+            const R1RedSvg = document.getElementById("R1RedSvg-" + index);
+
+            const R2GreenSvg = document.getElementById("R2GreenSvg-" + index);
+            const R2RedSvg = document.getElementById("R2RedSvg-" + index);
+
+            // Update visibility based on the server response JSON for R1
+            if (responseData.R1status === 'on') {
+                R1GreenSvg.style.display = "block";
+                R1RedSvg.style.display = "none";
+            } else {
+                R1GreenSvg.style.display = "none";
+                R1RedSvg.style.display = "block";
+            }
+
+            // Update visibility based on the server response JSON for R2
+            if (responseData.R2status === 'on') {
+                R2GreenSvg.style.display = "block";
+                R2RedSvg.style.display = "none";
+            } else {
+                R2GreenSvg.style.display = "none";
+                R2RedSvg.style.display = "block";
+            }
+        }
+        
+        function buttonClicked(element) {
+            var buttonClasses = element.className.split(' ');
+            var xhr = new XMLHttpRequest();
+            
+            var bttnpin = buttonClasses.find(className => !isNaN(className));
+
+            var indexClass = buttonClasses.find(className => className.startsWith('index-'));
+            if (indexClass) {
+                var index = parseInt(indexClass.split('-')[1]);
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        console.log("Response:", xhr.responseText);
+                    }
+                };
+
+                xhr.open("GET", "http://" + IPArray[index] + "/buttonUpdate?buttonID=" + bttnpin, true);
+
+                xhr.send();
+            }
+        }
+
+    function sendTime(indexClass) {
+        var hour = document.querySelector(".hour." + indexClass).value;
+        var minute = document.querySelector(".minute." + indexClass).value;
+
+        var index = parseInt(indexClass.split('-')[1]);
+
+        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+            alert("Invalid time input. Please enter valid values.");
+            return;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log("Response:", xhr.responseText);
+            }
+        };
+
+        xhr.open("GET", "http://" + IPArray[index] + "/time?hour=" + hour + "&minute=" + minute, true);
+
+        xhr.send();
+    }
+
+    var loader = document.getElementById("pre-loader");
+    window.addEventListener("load", function () {
+        setTimeout(function () {
+            loader.style.display = "none";
+        }, 1000);
+    });
+
+    </script>
+
+</body>
+</html>
